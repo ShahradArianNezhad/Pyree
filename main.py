@@ -162,7 +162,7 @@ def main():
         else:
             print(f"invalid usage usage: python main.py\n","       -v  verbose tokenizer output\n","       -o <filepath>  specify where the pdf representation should be put")
             exit(1)
-    else:
+    elif argc!=1:
         print(f"invalid usage usage, too many args supplied: python main.py\n","       -v  verbose tokenizer output\n","       -o <filepath>  specify where the pdf representation should be put")
         exit(1)
 
