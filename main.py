@@ -1,4 +1,4 @@
-
+import sys
 import graphviz
 
 dot = graphviz.Digraph()
@@ -37,17 +37,18 @@ def lexer(expr:str):
                     else:
                         tokens.append(["expression",expr[start_win_op:i+1]])
                         continue
-                if binding_powers[expr[i+1]] > binding_powers[expr[i-1]]:
-                    if start_win_op==None:
-                        start_win_op=i
-                elif binding_powers[expr[i+1]] < binding_powers[expr[i-1]]:
-                    tokens.append(["expression",expr[start_win_op:i+1]])
-                    if start_win_op!=None:
-                        start_win_op=None
-                    else:
-                        flag=True
-                # elif i+2<len(expr) and expr[i+2]=="(":
-
+                try:
+                    if binding_powers[expr[i+1]] > binding_powers[expr[i-1]]:
+                        if start_win_op==None:
+                            start_win_op=i
+                    elif binding_powers[expr[i+1]] < binding_powers[expr[i-1]]:
+                        tokens.append(["expression",expr[start_win_op:i+1]])
+                        if start_win_op!=None:
+                            start_win_op=None
+                        else:
+                            flag=True
+                except:
+                    raise Exception("non 1 digit chars used")
                 else:
                     if start_win_op==None:
                         tokens.append(["digit",expr[i]])
@@ -57,7 +58,10 @@ def lexer(expr:str):
                     open_braces_seen+=1
                     continue
                 if start_win_op==None:
-                    tokens.append(["operator",expr[i]])  
+                    if expr[i] in binding_powers:
+                        tokens.append(["operator",expr[i]])  
+                    else:
+                        raise Exception(f"invalid value supplied {expr[i]}: make sure all the numbers are only 1 digit and youre only using symbols inside binding_powers")
         elif(expr[i]==')'):
             if(open_braces_seen==close_braces_seen+1):   
                 if start_win_op==None:
@@ -134,14 +138,51 @@ def parse(tokens:list,dot:graphviz.Digraph):
 
 
 
+def main():
+    argc=len(sys.argv)
+    verbose=False
+    file_path="out"
+    
+    if argc==2:
+        if "-v" in sys.argv:
+            verbose=True
+        else:
+            print(f"invalid usage, {sys.argv[1]} is unknown. usage: python main.py\n","       -v  verbose tokenizer output\n","       -o <filepath>  specify where the pdf representation should be put")
+            exit(1)
+    if argc==3:
+        if "-o" in sys.argv:
+            file_path=sys.argv[2]
+        else:
+            print(f"invalid usage, {sys.argv[1]} is unknown. usage: python main.py\n","       -v  verbose tokenizer output\n","       -o <filepath>  specify where the pdf representation should be put")
+            exit(1)
+    if argc==4:
+        if "-o" in sys.argv and "-v" in sys.argv:
+            verbose=True
+            file_path=sys.argv[sys.argv.index("-o")+1]
+        else:
+            print(f"invalid usage usage: python main.py\n","       -v  verbose tokenizer output\n","       -o <filepath>  specify where the pdf representation should be put")
+            exit(1)
+    else:
+        print(f"invalid usage usage, too many args supplied: python main.py\n","       -v  verbose tokenizer output\n","       -o <filepath>  specify where the pdf representation should be put")
+        exit(1)
+
+
+    
+    inp = input().replace(" ","")
+    if len(inp)==0:
+        raise Exception("0 size input supplied")
+    elif len(inp)<3:
+        raise Exception("input is too smal")
+    tokens = lexer(inp)
+
+    if verbose:
+        print(tokens)
+
+
+    parse(tokens,dot)[1]
+    dot.render('my_graph.gv',file_path, format='pdf')
 
 
 
-tokens = lexer(input().replace(" ",""))
-
-print(tokens)
-
-print(parse(tokens,dot)[1])
-
-
-dot.render('my_graph.gv', format='pdf')
+if __name__ == "__main__":
+    main()
