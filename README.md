@@ -1,4 +1,4 @@
-# Math Operation Tree Parsing Visualizer
+# Pyree (python parse tree)
 a simple python app that tokenizez,parses complex user input to get the final result value, then visualizes the parsing tree using graphviz
 
 ## Requirements
